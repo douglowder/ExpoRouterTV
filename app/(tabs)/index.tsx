@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, Pressable } from 'react-native';
+import { Link } from 'expo-router';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -51,6 +52,22 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
+      </ThemedView>
+      <ThemedView>
+        <Link href="/modal" asChild>
+          <Pressable>
+            {({ focused }) => {
+              return (
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={{ opacity: focused ? 0.6 : 1.0 }}
+                >
+                  About this demo
+                </ThemedText>
+              );
+            }}
+          </Pressable>
+        </Link>
       </ThemedView>
     </ParallaxScrollView>
   );
