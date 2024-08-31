@@ -27,12 +27,20 @@
           }
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "name": "ExpoRouterTV",
-    "slug": "ExpoRouterTV"
+    "slug": "ExpoRouterTV",
+    "scheme": "ExpoRouterTV",
+    "version": "1.0.0",
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
   }
 }
