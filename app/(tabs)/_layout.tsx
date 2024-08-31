@@ -33,6 +33,7 @@ export default function TabLayout() {
         tabBarStyle: {
           height: textStyles.title.lineHeight * 2,
           marginBottom: 0,
+          paddingBottom: textStyles.title.lineHeight * 0.5,
         },
         headerShown: false,
       }}

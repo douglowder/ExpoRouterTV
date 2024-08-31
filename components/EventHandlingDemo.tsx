@@ -2,6 +2,7 @@ import {
   StyleSheet,
   Text,
   View,
+  TVFocusGuideView,
   useTVEventHandler,
   Platform,
   Pressable,
@@ -49,38 +50,42 @@ export function EventHandlingDemo() {
   const styles = useDemoStyles();
 
   return (
-    <ThemedView style={styles.container}>
-      <PressableButton title="Pressable" log={updatePressableLog} />
-      <TouchableOpacityButton
-        title="TouchableOpacity"
-        log={updatePressableLog}
-      />
-      <TouchableHighlightButton
-        title="TouchableHighlight"
-        log={updatePressableLog}
-      />
-      {Platform.OS === 'android' ? (
-        <TouchableNativeFeedbackButton
-          title="TouchableNativeFeedback"
+    <TVFocusGuideView>
+      <ThemedView style={styles.container}>
+        <PressableButton title="Pressable" log={updatePressableLog} />
+        <TouchableOpacityButton
+          title="TouchableOpacity"
           log={updatePressableLog}
         />
-      ) : null}
+        <TouchableHighlightButton
+          title="TouchableHighlight"
+          log={updatePressableLog}
+        />
+        {Platform.OS === 'android' ? (
+          <TouchableNativeFeedbackButton
+            title="TouchableNativeFeedback"
+            log={updatePressableLog}
+          />
+        ) : null}
 
-      <ThemedView style={styles.logContainer}>
-        <View>
-          <ThemedText type="defaultSemiBold">Focus/press events</ThemedText>
-          <ThemedText style={styles.logText}>
-            {remoteEventLog.join('\n')}
-          </ThemedText>
-        </View>
-        <View>
-          <ThemedText type="defaultSemiBold">Remote control events</ThemedText>
-          <ThemedText style={styles.logText}>
-            {pressableEventLog.join('\n')}
-          </ThemedText>
-        </View>
+        <ThemedView style={styles.logContainer}>
+          <View>
+            <ThemedText type="defaultSemiBold">Focus/press events</ThemedText>
+            <ThemedText style={styles.logText}>
+              {remoteEventLog.join('\n')}
+            </ThemedText>
+          </View>
+          <View>
+            <ThemedText type="defaultSemiBold">
+              Remote control events
+            </ThemedText>
+            <ThemedText style={styles.logText}>
+              {pressableEventLog.join('\n')}
+            </ThemedText>
+          </View>
+        </ThemedView>
       </ThemedView>
-    </ThemedView>
+    </TVFocusGuideView>
   );
 }
 
