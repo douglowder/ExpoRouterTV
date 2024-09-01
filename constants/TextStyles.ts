@@ -35,5 +35,9 @@ export const textStyles = function (
       fontSize: 16 * scale,
       color: linkColor,
     },
+    small: {
+      lineHeight: 10 * scale,
+      fontSize: 8 * scale,
+    },
   };
 };
