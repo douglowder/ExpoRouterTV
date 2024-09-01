@@ -14,18 +14,29 @@ This project uses
 
 - `cd` into the project
 
+- TV builds:
+
+```sh
+yarn
+yarn prebuild:tv # Executes Expo prebuild with TV modifications
+yarn ios:tv # Build and run for Apple TV
+yarn android:tv # Build and run for Android TV
+```
+
+- Mobile builds:
+
 ```sh
 yarn
 yarn prebuild # Executes Expo prebuild with TV modifications
-yarn ios # Build and run for Apple TV
-yarn android # Build for Android TV
+yarn ios # Build and run for iOS
+yarn android # Build and run for Android mobile
 ```
 
 ## Development
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-This project includes a [demo](./components/EventHandlingDemo.tsx)showing how to use React Native TV APIs to highlight controls as the user navigates the screen with the remote control.
+This project includes a [demo](./components/EventHandlingDemo.tsx) showing how to use React Native TV APIs to highlight controls as the user navigates the screen with the remote control.
 
 ## TV specific file extensions
 
