@@ -8,12 +8,18 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useScale } from '@/hooks/useScale';
-const hermesVersion =
-  (global as any).HermesInternal?.getRuntimeProperties?.()[
-    'OSS Release Version'
-  ] ?? '';
+const hermesVersion = (global as any)?.HermesInternal?.getRuntimeProperties();
 const jsEngine =
   Platform.OS === 'web' ? 'Browser' : hermesVersion ? `Hermes` : 'JSC';
+
+const uiManager =
+  ((global as any)?.nativeFabricUIManager as any) !== undefined
+    ? 'Fabric'
+    : 'Paper';
+const reactNativeInfo = {
+  hermesVersion,
+  uiManager,
+};
 
 export default function Modal() {
   const styles = useHomeScreenStyles();
@@ -34,9 +40,12 @@ export default function Modal() {
     >
       <ThemedView>
         <ThemedText type="title">About this demo</ThemedText>
-        <ThemedText>{`expo-router: ${routerVersion}`}</ThemedText>
-        <ThemedText>{`react-native-tvos: ${rnVersion}`}</ThemedText>
-        <ThemedText>{`JS engine: ${jsEngine}`}</ThemedText>
+        <ThemedText type="small">{`expo-router: ${routerVersion}`}</ThemedText>
+        <ThemedText type="small">{`react-native-tvos: ${rnVersion}`}</ThemedText>
+        <ThemedText type="small">{`Hermes bytecode version: ${reactNativeInfo.hermesVersion['Bytecode Version']}`}</ThemedText>
+        <ThemedText type="small">{`${
+          reactNativeInfo?.uiManager === 'Fabric' ? 'Fabric enabled' : ''
+        }`}</ThemedText>
       </ThemedView>
       {/* Use `../` as a simple way to navigate to the root. This is not analogous to "goBack". */}
       <Link href="../" asChild>
