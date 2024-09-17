@@ -1,0 +1,16 @@
+diff --git a/node_modules/react-native-gesture-handler/apple/Handlers/RNLongPressHandler.m b/node_modules/react-native-gesture-handler/apple/Handlers/RNLongPressHandler.m
+index 8f2d24c..88fb9d2 100644
+--- a/node_modules/react-native-gesture-handler/apple/Handlers/RNLongPressHandler.m
++++ b/node_modules/react-native-gesture-handler/apple/Handlers/RNLongPressHandler.m
+@@ -234,9 +234,11 @@
+   }
+ 
+   prop = config[@"numberOfPointers"];
++#if !TARGET_OS_TV
+   if (prop != nil) {
+     recognizer.numberOfTouchesRequired = [RCTConvert CGFloat:prop];
+   }
++#endif
+ }
+ 
+ #if !TARGET_OS_OSX

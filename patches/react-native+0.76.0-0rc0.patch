@@ -1,0 +1,799 @@
+diff --git a/node_modules/react-native/Libraries/Animated/components/AnimatedScrollView.js b/node_modules/react-native/Libraries/Animated/components/AnimatedScrollView.js
+index cd87f75..f537565 100644
+--- a/node_modules/react-native/Libraries/Animated/components/AnimatedScrollView.js
++++ b/node_modules/react-native/Libraries/Animated/components/AnimatedScrollView.js
+@@ -46,7 +46,6 @@ const AnimatedScrollView: AnimatedComponentType<Props, Instance> =
+         props.style != null
+       ) {
+         return (
+-          // $FlowFixMe[prop-missing]
+           <AnimatedScrollViewWithInvertedRefreshControl
+             scrollEventThrottle={0.0001}
+             {...props}
+diff --git a/node_modules/react-native/Libraries/Animated/createAnimatedComponent.js b/node_modules/react-native/Libraries/Animated/createAnimatedComponent.js
+index 8c9fbea..c72a8f6 100644
+--- a/node_modules/react-native/Libraries/Animated/createAnimatedComponent.js
++++ b/node_modules/react-native/Libraries/Animated/createAnimatedComponent.js
+@@ -15,15 +15,14 @@ import useAnimatedProps from './useAnimatedProps';
+ import * as React from 'react';
+ import {useMemo} from 'react';
+ 
+-export type AnimatedProps<Props: {...}> = {
+-  // eslint-disable-next-line no-unused-vars
+-  +[_K in keyof (Props &
+-      $ReadOnly<{
+-        passthroughAnimatedPropExplicitValues?: React.ElementConfig<
+-          typeof View,
+-        >,
+-      }>)]: any,
+-};
++// $FlowFixMe[deprecated-type]
++export type AnimatedProps<Props: {...}> = $ObjMap<
++  Props &
++    $ReadOnly<{
++      passthroughAnimatedPropExplicitValues?: React.ElementConfig<typeof View>,
++    }>,
++  () => any,
++>;
+ 
+ export type AnimatedComponentType<
+   Props: {...},
+diff --git a/node_modules/react-native/Libraries/Animated/nodes/AnimatedObject.js b/node_modules/react-native/Libraries/Animated/nodes/AnimatedObject.js
+index 2f3ff76..850964c 100644
+--- a/node_modules/react-native/Libraries/Animated/nodes/AnimatedObject.js
++++ b/node_modules/react-native/Libraries/Animated/nodes/AnimatedObject.js
+@@ -21,7 +21,7 @@ const MAX_DEPTH = 5;
+ 
+ /* $FlowIssue[incompatible-type-guard] - Flow does not know that the prototype
+    and ReactElement checks preserve the type refinement of `value`. */
+-function isPlainObject(value: mixed): value is $ReadOnly<{[string]: mixed}> {
++function isPlainObject(value: mixed) {
+   return (
+     value !== null &&
+     typeof value === 'object' &&
+diff --git a/node_modules/react-native/Libraries/vendor/emitter/EventEmitter.js b/node_modules/react-native/Libraries/vendor/emitter/EventEmitter.js
+index 1087654..6aaad2e 100644
+--- a/node_modules/react-native/Libraries/vendor/emitter/EventEmitter.js
++++ b/node_modules/react-native/Libraries/vendor/emitter/EventEmitter.js
+@@ -35,9 +35,11 @@ interface Registration<TArgs> {
+   +remove: () => void;
+ }
+ 
+-type Registry<TEventToArgsMap: {...}> = {
+-  [K in keyof TEventToArgsMap]: Set<Registration<TEventToArgsMap[K]>>,
+-};
++// $FlowFixMe[deprecated-type]
++type Registry<TEventToArgsMap: {...}> = $ObjMap<
++  TEventToArgsMap,
++  <TArgs>(TArgs) => Set<Registration<TArgs>>,
++>;
+ 
+ /**
+  * EventEmitter manages listeners and publishes events to them.
+@@ -62,7 +64,6 @@ type Registry<TEventToArgsMap: {...}> = {
+ export default class EventEmitter<TEventToArgsMap: {...}>
+   implements IEventEmitter<TEventToArgsMap>
+ {
+-  // $FlowFixMe[incompatible-type]
+   #registry: Registry<TEventToArgsMap> = {};
+ 
+   /**
+@@ -125,7 +126,6 @@ export default class EventEmitter<TEventToArgsMap: {...}>
+     eventType?: ?TEvent,
+   ): void {
+     if (eventType == null) {
+-      // $FlowFixMe[incompatible-type]
+       this.#registry = {};
+     } else {
+       delete this.#registry[eventType];
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.cpp b/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.cpp
+index 06226c5..eadc0a9 100644
+--- a/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.cpp
++++ b/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.cpp
+@@ -210,4 +210,10 @@ const RawValue* RawProps::at(
+   return parser_->at(*this, RawPropsKey{prefix, name, suffix});
+ }
+ 
++void RawProps::iterateOverValues(
++    const std::function<
++        void(RawPropsPropNameHash, const char*, const RawValue&)>& fn) const {
++  return parser_->iterateOverValues(*this, fn);
++}
++
+ } // namespace facebook::react
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.h b/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.h
+index b7716be..ab62851 100644
+--- a/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.h
++++ b/node_modules/react-native/ReactCommon/react/renderer/core/RawProps.h
+@@ -95,6 +95,14 @@ class RawProps final {
+   const RawValue* at(const char* name, const char* prefix, const char* suffix)
+       const noexcept;
+ 
++  /**
++   * Iterator functions: for when you want to iterate over values in-order
++   * instead of using `at` to access values randomly.
++   */
++  void iterateOverValues(
++      const std::function<
++          void(RawPropsPropNameHash, const char*, const RawValue&)>& fn) const;
++
+  private:
+   friend class RawPropsParser;
+ 
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.cpp b/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.cpp
+index 122956d..04cf1d9 100644
+--- a/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.cpp
++++ b/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.cpp
+@@ -45,23 +45,23 @@ const RawValue* RawPropsParser::at(
+     return nullptr;
+   }
+ 
+-// Normally, keys are looked up in-order. For performance we can simply
+-// increment this key counter, and if the key is equal to the key at the next
+-// index, there's no need to do any lookups. However, it's possible for keys
+-// to be accessed out-of-order or multiple times, in which case we start
+-// searching again from index 0.
+-// To prevent infinite loops (which can occur if you look up a key that
+-// doesn't exist) we keep track of whether or not we've already looped around,
+-// and log and return nullptr if so. However, we ONLY do this in debug mode,
+-// where you're more likely to look up a nonexistent key as part of debugging.
+-// You can (and must) ensure infinite loops are not possible in production by:
+-// (1) constructing all props objects without conditionals, or (2) if there
+-// are conditionals, ensure that in the parsing setup case, the Props
+-// constructor will access _all_ possible props. To ensure this performance
+-// optimization is utilized, always access props in the same order every time.
+-// This is trivial if you have a simple Props constructor, but difficult or
+-// impossible if you have a shared sub-prop Struct that is used by multiple
+-// parent Props.
++  // Normally, keys are looked up in-order. For performance we can simply
++  // increment this key counter, and if the key is equal to the key at the next
++  // index, there's no need to do any lookups. However, it's possible for keys
++  // to be accessed out-of-order or multiple times, in which case we start
++  // searching again from index 0.
++  // To prevent infinite loops (which can occur if you look up a key that
++  // doesn't exist) we keep track of whether or not we've already looped around,
++  // and log and return nullptr if so. However, we ONLY do this in debug mode,
++  // where you're more likely to look up a nonexistent key as part of debugging.
++  // You can (and must) ensure infinite loops are not possible in production by:
++  // (1) constructing all props objects without conditionals, or (2) if there
++  // are conditionals, ensure that in the parsing setup case, the Props
++  // constructor will access _all_ possible props. To ensure this performance
++  // optimization is utilized, always access props in the same order every time.
++  // This is trivial if you have a simple Props constructor, but difficult or
++  // impossible if you have a shared sub-prop Struct that is used by multiple
++  // parent Props.
+ #ifdef REACT_NATIVE_DEBUG
+   bool resetLoop = false;
+ #endif
+@@ -125,7 +125,10 @@ void RawPropsParser::preparse(const RawProps& rawProps) const noexcept {
+ 
+       for (size_t i = 0; i < count; i++) {
+         auto nameValue = names.getValueAtIndex(runtime, i).getString(runtime);
++        auto value = object.getProperty(runtime, nameValue);
++
+         auto name = nameValue.utf8(runtime);
++
+         auto keyIndex = nameToIndex_.at(
+             name.data(), static_cast<RawPropsPropNameLength>(name.size()));
+ 
+@@ -134,8 +137,6 @@ void RawPropsParser::preparse(const RawProps& rawProps) const noexcept {
+         }
+ 
+         rawProps.keyIndexToValueIndex_[keyIndex] = valueIndex;
+-
+-        auto value = object.getProperty(runtime, nameValue);
+         rawProps.values_.push_back(
+             RawValue(jsi::dynamicFromValue(runtime, value)));
+         valueIndex++;
+@@ -167,4 +168,57 @@ void RawPropsParser::preparse(const RawProps& rawProps) const noexcept {
+   }
+ }
+ 
++/**
++ * To be used by RawProps only. Value iterator functions.
++ */
++void RawPropsParser::iterateOverValues(
++    const RawProps& rawProps,
++    const std::function<
++        void(RawPropsPropNameHash, const char*, const RawValue&)>& visit)
++    const {
++  switch (rawProps.mode_) {
++    case RawProps::Mode::Empty:
++      return;
++
++    case RawProps::Mode::JSI: {
++      auto& runtime = *rawProps.runtime_;
++      if (!rawProps.value_.isObject()) {
++        LOG(ERROR) << "Preparse props: rawProps value is not object";
++      }
++      react_native_assert(rawProps.value_.isObject());
++      auto object = rawProps.value_.asObject(runtime);
++
++      auto names = object.getPropertyNames(runtime);
++      auto count = names.size(runtime);
++
++      for (size_t i = 0; i < count; i++) {
++        auto nameValue = names.getValueAtIndex(runtime, i).getString(runtime);
++        auto value = object.getProperty(runtime, nameValue);
++
++        auto name = nameValue.utf8(runtime);
++
++        auto nameHash = RAW_PROPS_KEY_HASH(name);
++        auto rawValue = RawValue(jsi::dynamicFromValue(runtime, value));
++
++        visit(nameHash, name.c_str(), rawValue);
++      }
++
++      break;
++    }
++
++    case RawProps::Mode::Dynamic: {
++      const auto& dynamic = rawProps.dynamic_;
++
++      for (const auto& pair : dynamic.items()) {
++        auto name = pair.first.getString();
++
++        auto nameHash = RAW_PROPS_KEY_HASH(name);
++        auto rawValue = RawValue{pair.second};
++        visit(nameHash, name.c_str(), rawValue);
++      }
++      break;
++    }
++  }
++}
++
+ } // namespace facebook::react
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.h b/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.h
+index 6016c39..6ffb38b 100644
+--- a/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.h
++++ b/node_modules/react-native/ReactCommon/react/renderer/core/RawPropsParser.h
+@@ -73,6 +73,15 @@ class RawPropsParser final {
+   const RawValue* at(const RawProps& rawProps, const RawPropsKey& key)
+       const noexcept;
+ 
++  /**
++   * To be used by RawProps only. Value iterator functions.
++   */
++  void iterateOverValues(
++      const RawProps& rawProps,
++      const std::function<
++          void(RawPropsPropNameHash, const char*, const RawValue&)>& visit)
++      const;
++
+   mutable std::vector<RawPropsKey> keys_{};
+   mutable RawPropsKeyMap nameToIndex_{};
+   mutable bool ready_{false};
+diff --git a/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec b/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec
+index d2d4141..49da687 100644
+--- a/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec
++++ b/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec
+@@ -8,7 +8,7 @@ require_relative "./hermes-utils.rb"
+ 
+ react_native_path = File.dirname(Pod::Executable.execute_command('node', ['-p',
+   'require.resolve(
+-  "react-native-tvos",
++  "react-native",
+     {paths: [process.argv[1]]},
+   )', __dir__]).strip
+ )
+diff --git a/node_modules/react-native/src/private/animated/NativeAnimatedHelper.js b/node_modules/react-native/src/private/animated/NativeAnimatedHelper.js
+index fac5756..913c84b 100644
+--- a/node_modules/react-native/src/private/animated/NativeAnimatedHelper.js
++++ b/node_modules/react-native/src/private/animated/NativeAnimatedHelper.js
+@@ -16,6 +16,7 @@ import type {
+ } from '../../../Libraries/Animated/animations/Animation';
+ import type {
+   AnimatedNodeConfig,
++  AnimatingNodeConfig,
+   EventMapping,
+ } from '../../../Libraries/Animated/NativeAnimatedModule';
+ 
+@@ -26,10 +27,9 @@ import Platform from '../../../Libraries/Utilities/Platform';
+ import NativeAnimatedNonTurboModule from '../../../Libraries/Animated/NativeAnimatedModule';
+ import NativeAnimatedTurboModule from '../../../Libraries/Animated/NativeAnimatedTurboModule';
+ import invariant from 'invariant';
+-import nullthrows from 'nullthrows';
+ 
+ // TODO T69437152 @petetheheat - Delete this fork when Fabric ships to 100%.
+-const NativeAnimatedModule: typeof NativeAnimatedTurboModule =
++const NativeAnimatedModule =
+   NativeAnimatedNonTurboModule ?? NativeAnimatedTurboModule;
+ 
+ let __nativeAnimatedNodeTagCount = 1; /* used for animated nodes */
+@@ -40,11 +40,12 @@ let nativeEventEmitter;
+ let waitingForQueuedOperations = new Set<string>();
+ let queueOperations = false;
+ let queue: Array<() => void> = [];
+-let singleOpQueue: Array<mixed> = [];
++// $FlowFixMe
++let singleOpQueue: Array<any> = [];
+ 
+-const isSingleOpBatching =
++const useSingleOpBatching =
+   Platform.OS === 'android' &&
+-  NativeAnimatedModule?.queueAndExecuteBatchedOperations != null &&
++  !!NativeAnimatedModule?.queueAndExecuteBatchedOperations &&
+   ReactNativeFeatureFlags.animatedShouldUseSingleOp();
+ let flushQueueTimeout = null;
+ 
+@@ -57,87 +58,61 @@ const eventListenerAnimationFinishedCallbacks: {
+ let globalEventEmitterGetValueListener: ?EventSubscription = null;
+ let globalEventEmitterAnimationFinishedListener: ?EventSubscription = null;
+ 
+-function createNativeOperations(): $NonMaybeType<typeof NativeAnimatedModule> {
+-  const methodNames = [
+-    'createAnimatedNode', // 1
+-    'updateAnimatedNodeConfig', // 2
+-    'getValue', // 3
+-    'startListeningToAnimatedNodeValue', // 4
+-    'stopListeningToAnimatedNodeValue', // 5
+-    'connectAnimatedNodes', // 6
+-    'disconnectAnimatedNodes', // 7
+-    'startAnimatingNode', // 8
+-    'stopAnimation', // 9
+-    'setAnimatedNodeValue', // 10
+-    'setAnimatedNodeOffset', // 11
+-    'flattenAnimatedNodeOffset', // 12
+-    'extractAnimatedNodeOffset', // 13
+-    'connectAnimatedNodeToView', // 14
+-    'disconnectAnimatedNodeFromView', // 15
+-    'restoreDefaultValues', // 16
+-    'dropAnimatedNode', // 17
+-    'addAnimatedEventToView', // 18
+-    'removeAnimatedEventFromView', // 19
+-    'addListener', // 20
+-    'removeListener', // 21
+-  ];
+-  const nativeOperations: {
+-    [$Values<typeof methodNames>]: (...$ReadOnlyArray<mixed>) => void,
+-  } = {};
+-  if (isSingleOpBatching) {
+-    for (let ii = 0, length = methodNames.length; ii < length; ii++) {
+-      const methodName = methodNames[ii];
+-      const operationID = ii + 1;
+-      nativeOperations[methodName] = (...args) => {
+-        // `singleOpQueue` is a flat array of operation IDs and arguments, which
+-        // is possible because # arguments is fixed for each operation. For more
+-        // details, see `NativeAnimatedModule.queueAndExecuteBatchedOperations`.
+-        singleOpQueue.push(operationID, ...args);
+-      };
+-    }
+-  } else {
+-    for (let ii = 0, length = methodNames.length; ii < length; ii++) {
+-      const methodName = methodNames[ii];
+-      nativeOperations[methodName] = (...args) => {
+-        const method = nullthrows(NativeAnimatedModule)[methodName];
+-        // If queueing is explicitly on, *or* the queue has not yet
+-        // been flushed, use the queue. This is to prevent operations
+-        // from being executed out of order.
+-        if (queueOperations || queue.length !== 0) {
+-          // $FlowExpectedError[incompatible-call] - Dynamism.
+-          queue.push(() => method(...args));
+-        } else {
+-          // $FlowExpectedError[incompatible-call] - Dynamism.
+-          method(...args);
+-        }
+-      };
+-    }
+-  }
+-  // $FlowExpectedError[incompatible-return] - Dynamism.
+-  return nativeOperations;
+-}
+-
+-const NativeOperations = createNativeOperations();
++const nativeOps: ?typeof NativeAnimatedModule = useSingleOpBatching
++  ? ((function () {
++      const apis = [
++        'createAnimatedNode', // 1
++        'updateAnimatedNodeConfig', // 2
++        'getValue', // 3
++        'startListeningToAnimatedNodeValue', // 4
++        'stopListeningToAnimatedNodeValue', // 5
++        'connectAnimatedNodes', // 6
++        'disconnectAnimatedNodes', // 7
++        'startAnimatingNode', // 8
++        'stopAnimation', // 9
++        'setAnimatedNodeValue', // 10
++        'setAnimatedNodeOffset', // 11
++        'flattenAnimatedNodeOffset', // 12
++        'extractAnimatedNodeOffset', // 13
++        'connectAnimatedNodeToView', // 14
++        'disconnectAnimatedNodeFromView', // 15
++        'restoreDefaultValues', // 16
++        'dropAnimatedNode', // 17
++        'addAnimatedEventToView', // 18
++        'removeAnimatedEventFromView', // 19
++        'addListener', // 20
++        'removeListener', // 21
++      ];
++      return apis.reduce<{[string]: number}>((acc, functionName, i) => {
++        // These indices need to be kept in sync with the indices in native (see NativeAnimatedModule in Java, or the equivalent for any other native platform).
++        // $FlowFixMe[prop-missing]
++        acc[functionName] = i + 1;
++        return acc;
++      }, {});
++    })(): $FlowFixMe)
++  : NativeAnimatedModule;
+ 
+ /**
+  * Wrappers around NativeAnimatedModule to provide flow and autocomplete support for
+  * the native module methods, and automatic queue management on Android
+  */
+ const API = {
+-  getValue: (isSingleOpBatching
+-    ? (tag, saveValueCallback) => {
+-        if (saveValueCallback) {
+-          eventListenerGetValueCallbacks[tag] = saveValueCallback;
+-        }
+-        /* $FlowExpectedError[incompatible-call] - `saveValueCallback` is handled
+-            differently when `isSingleOpBatching` is enabled. */
+-        NativeOperations.getValue(tag);
++  getValue: function (
++    tag: number,
++    saveValueCallback: (value: number) => void,
++  ): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    if (useSingleOpBatching) {
++      if (saveValueCallback) {
++        eventListenerGetValueCallbacks[tag] = saveValueCallback;
+       }
+-    : (tag, saveValueCallback) => {
+-        NativeOperations.getValue(tag, saveValueCallback);
+-      }) as $NonMaybeType<typeof NativeAnimatedModule>['getValue'],
+-
+-  setWaitingForIdentifier(id: string): void {
++      // $FlowFixMe
++      API.queueOperation(nativeOps.getValue, tag);
++    } else {
++      API.queueOperation(nativeOps.getValue, tag, saveValueCallback);
++    }
++  },
++  setWaitingForIdentifier: function (id: string): void {
+     waitingForQueuedOperations.add(id);
+     queueOperations = true;
+     if (
+@@ -147,8 +122,7 @@ const API = {
+       clearTimeout(flushQueueTimeout);
+     }
+   },
+-
+-  unsetWaitingForIdentifier(id: string): void {
++  unsetWaitingForIdentifier: function (id: string): void {
+     waitingForQueuedOperations.delete(id);
+ 
+     if (waitingForQueuedOperations.size === 0) {
+@@ -156,9 +130,8 @@ const API = {
+       API.disableQueue();
+     }
+   },
+-
+-  disableQueue(): void {
+-    invariant(NativeAnimatedModule, 'Native animated module is not available');
++  disableQueue: function (): void {
++    invariant(nativeOps, 'Native animated module is not available');
+ 
+     if (ReactNativeFeatureFlags.animatedShouldDebounceQueueFlush()) {
+       const prevTimeout = flushQueueTimeout;
+@@ -168,148 +141,196 @@ const API = {
+       API.flushQueue();
+     }
+   },
++  flushQueue: function (): void {
++    // TODO: (T136971132)
++    invariant(
++      NativeAnimatedModule || process.env.NODE_ENV === 'test',
++      'Native animated module is not available',
++    );
++    flushQueueTimeout = null;
+ 
+-  flushQueue: (isSingleOpBatching
+-    ? (): void => {
+-        // TODO: (T136971132)
+-        invariant(
+-          NativeAnimatedModule || process.env.NODE_ENV === 'test',
+-          'Native animated module is not available',
+-        );
+-        flushQueueTimeout = null;
+-
+-        if (singleOpQueue.length === 0) {
+-          return;
+-        }
+-
+-        // Set up event listener for callbacks if it's not set up
+-        ensureGlobalEventEmitterListeners();
++    // Early returns before calling any APIs
++    if (useSingleOpBatching && singleOpQueue.length === 0) {
++      return;
++    }
++    if (!useSingleOpBatching && queue.length === 0) {
++      return;
++    }
+ 
+-        // Single op batching doesn't use callback functions, instead we
+-        // use RCTDeviceEventEmitter. This reduces overhead of sending lots of
+-        // JSI functions across to native code; but also, TM infrastructure currently
+-        // does not support packing a function into native arrays.
+-        NativeAnimatedModule?.queueAndExecuteBatchedOperations?.(singleOpQueue);
+-        singleOpQueue.length = 0;
++    if (useSingleOpBatching) {
++      // Set up event listener for callbacks if it's not set up
++      if (
++        !globalEventEmitterGetValueListener ||
++        !globalEventEmitterAnimationFinishedListener
++      ) {
++        setupGlobalEventEmitterListeners();
+       }
+-    : (): void => {
+-        // TODO: (T136971132)
+-        invariant(
+-          NativeAnimatedModule || process.env.NODE_ENV === 'test',
+-          'Native animated module is not available',
+-        );
+-        flushQueueTimeout = null;
+-
+-        if (queue.length === 0) {
+-          return;
+-        }
+-
+-        if (Platform.OS === 'android') {
+-          NativeAnimatedModule?.startOperationBatch?.();
+-        }
+-
+-        for (let q = 0, l = queue.length; q < l; q++) {
+-          queue[q]();
+-        }
+-        queue.length = 0;
+-
+-        if (Platform.OS === 'android') {
+-          NativeAnimatedModule?.finishOperationBatch?.();
+-        }
+-      }) as () => void,
++      // Single op batching doesn't use callback functions, instead we
++      // use RCTDeviceEventEmitter. This reduces overhead of sending lots of
++      // JSI functions across to native code; but also, TM infrastructure currently
++      // does not support packing a function into native arrays.
++      NativeAnimatedModule?.queueAndExecuteBatchedOperations?.(singleOpQueue);
++      singleOpQueue.length = 0;
++    } else {
++      Platform.OS === 'android' &&
++        NativeAnimatedModule?.startOperationBatch?.();
+ 
+-  createAnimatedNode(tag: number, config: AnimatedNodeConfig): void {
+-    NativeOperations.createAnimatedNode(tag, config);
++      for (let q = 0, l = queue.length; q < l; q++) {
++        queue[q]();
++      }
++      queue.length = 0;
++      Platform.OS === 'android' &&
++        NativeAnimatedModule?.finishOperationBatch?.();
++    }
+   },
++  queueOperation: <Args: $ReadOnlyArray<mixed>, Fn: (...Args) => void>(
++    fn: Fn,
++    ...args: Args
++  ): void => {
++    if (useSingleOpBatching) {
++      // Get the command ID from the queued function, and push that ID and any arguments needed to execute the operation
++      // $FlowFixMe: surprise, fn is actually a number
++      singleOpQueue.push(fn, ...args);
++      return;
++    }
+ 
+-  updateAnimatedNodeConfig(tag: number, config: AnimatedNodeConfig): void {
+-    NativeOperations.updateAnimatedNodeConfig?.(tag, config);
++    // If queueing is explicitly on, *or* the queue has not yet
++    // been flushed, use the queue. This is to prevent operations
++    // from being executed out of order.
++    if (queueOperations || queue.length !== 0) {
++      queue.push(() => fn(...args));
++    } else {
++      fn(...args);
++    }
+   },
+-
+-  startListeningToAnimatedNodeValue(tag: number): void {
+-    NativeOperations.startListeningToAnimatedNodeValue(tag);
++  createAnimatedNode: function (tag: number, config: AnimatedNodeConfig): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.createAnimatedNode, tag, config);
+   },
+-
+-  stopListeningToAnimatedNodeValue(tag: number): void {
+-    NativeOperations.stopListeningToAnimatedNodeValue(tag);
++  updateAnimatedNodeConfig: function (
++    tag: number,
++    config: AnimatedNodeConfig,
++  ): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    if (nativeOps.updateAnimatedNodeConfig) {
++      API.queueOperation(nativeOps.updateAnimatedNodeConfig, tag, config);
++    }
+   },
+-
+-  connectAnimatedNodes(parentTag: number, childTag: number): void {
+-    NativeOperations.connectAnimatedNodes(parentTag, childTag);
++  startListeningToAnimatedNodeValue: function (tag: number) {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.startListeningToAnimatedNodeValue, tag);
+   },
+-
+-  disconnectAnimatedNodes(parentTag: number, childTag: number): void {
+-    NativeOperations.disconnectAnimatedNodes(parentTag, childTag);
++  stopListeningToAnimatedNodeValue: function (tag: number) {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.stopListeningToAnimatedNodeValue, tag);
+   },
+-
+-  startAnimatingNode: (isSingleOpBatching
+-    ? (animationId, nodeTag, config, endCallback) => {
+-        if (endCallback) {
+-          eventListenerAnimationFinishedCallbacks[animationId] = endCallback;
+-        }
+-        /* $FlowExpectedError[incompatible-call] - `endCallback` is handled
+-            differently when `isSingleOpBatching` is enabled. */
+-        NativeOperations.startAnimatingNode(animationId, nodeTag, config);
++  connectAnimatedNodes: function (parentTag: number, childTag: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.connectAnimatedNodes, parentTag, childTag);
++  },
++  disconnectAnimatedNodes: function (
++    parentTag: number,
++    childTag: number,
++  ): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.disconnectAnimatedNodes, parentTag, childTag);
++  },
++  startAnimatingNode: function (
++    animationId: number,
++    nodeTag: number,
++    config: AnimatingNodeConfig,
++    endCallback: EndCallback,
++  ): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    if (useSingleOpBatching) {
++      if (endCallback) {
++        eventListenerAnimationFinishedCallbacks[animationId] = endCallback;
+       }
+-    : (animationId, nodeTag, config, endCallback) => {
+-        NativeOperations.startAnimatingNode(
+-          animationId,
+-          nodeTag,
+-          config,
+-          endCallback,
+-        );
+-      }) as $NonMaybeType<typeof NativeAnimatedModule>['startAnimatingNode'],
+-
+-  stopAnimation(animationId: number) {
+-    NativeOperations.stopAnimation(animationId);
++      // $FlowFixMe
++      API.queueOperation(
++        // $FlowFixMe[incompatible-call]
++        nativeOps.startAnimatingNode,
++        animationId,
++        nodeTag,
++        config,
++      );
++    } else {
++      API.queueOperation(
++        nativeOps.startAnimatingNode,
++        animationId,
++        nodeTag,
++        config,
++        endCallback,
++      );
++    }
+   },
+-
+-  setAnimatedNodeValue(nodeTag: number, value: number): void {
+-    NativeOperations.setAnimatedNodeValue(nodeTag, value);
++  stopAnimation: function (animationId: number) {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.stopAnimation, animationId);
+   },
+-
+-  setAnimatedNodeOffset(nodeTag: number, offset: number): void {
+-    NativeOperations.setAnimatedNodeOffset(nodeTag, offset);
++  setAnimatedNodeValue: function (nodeTag: number, value: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.setAnimatedNodeValue, nodeTag, value);
+   },
+-
+-  flattenAnimatedNodeOffset(nodeTag: number): void {
+-    NativeOperations.flattenAnimatedNodeOffset(nodeTag);
++  setAnimatedNodeOffset: function (nodeTag: number, offset: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.setAnimatedNodeOffset, nodeTag, offset);
+   },
+-
+-  extractAnimatedNodeOffset(nodeTag: number): void {
+-    NativeOperations.extractAnimatedNodeOffset(nodeTag);
++  flattenAnimatedNodeOffset: function (nodeTag: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.flattenAnimatedNodeOffset, nodeTag);
+   },
+-
+-  connectAnimatedNodeToView(nodeTag: number, viewTag: number): void {
+-    NativeOperations.connectAnimatedNodeToView(nodeTag, viewTag);
++  extractAnimatedNodeOffset: function (nodeTag: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.extractAnimatedNodeOffset, nodeTag);
+   },
+-
+-  disconnectAnimatedNodeFromView(nodeTag: number, viewTag: number): void {
+-    NativeOperations.disconnectAnimatedNodeFromView(nodeTag, viewTag);
++  connectAnimatedNodeToView: function (nodeTag: number, viewTag: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.connectAnimatedNodeToView, nodeTag, viewTag);
+   },
+-
+-  restoreDefaultValues(nodeTag: number): void {
+-    NativeOperations.restoreDefaultValues?.(nodeTag);
++  disconnectAnimatedNodeFromView: function (
++    nodeTag: number,
++    viewTag: number,
++  ): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(
++      nativeOps.disconnectAnimatedNodeFromView,
++      nodeTag,
++      viewTag,
++    );
+   },
+-
+-  dropAnimatedNode(tag: number): void {
+-    NativeOperations.dropAnimatedNode(tag);
++  restoreDefaultValues: function (nodeTag: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    // Backwards compat with older native runtimes, can be removed later.
++    if (nativeOps.restoreDefaultValues != null) {
++      API.queueOperation(nativeOps.restoreDefaultValues, nodeTag);
++    }
+   },
+-
+-  addAnimatedEventToView(
++  dropAnimatedNode: function (tag: number): void {
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(nativeOps.dropAnimatedNode, tag);
++  },
++  addAnimatedEventToView: function (
+     viewTag: number,
+     eventName: string,
+     eventMapping: EventMapping,
+   ) {
+-    NativeOperations.addAnimatedEventToView(viewTag, eventName, eventMapping);
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(
++      nativeOps.addAnimatedEventToView,
++      viewTag,
++      eventName,
++      eventMapping,
++    );
+   },
+-
+   removeAnimatedEventFromView(
+     viewTag: number,
+     eventName: string,
+     animatedNodeTag: number,
+   ) {
+-    NativeOperations.removeAnimatedEventFromView(
++    invariant(nativeOps, 'Native animated module is not available');
++    API.queueOperation(
++      nativeOps.removeAnimatedEventFromView,
+       viewTag,
+       eventName,
+       animatedNodeTag,
+@@ -317,13 +338,7 @@ const API = {
+   },
+ };
+ 
+-function ensureGlobalEventEmitterListeners() {
+-  if (
+-    globalEventEmitterGetValueListener &&
+-    globalEventEmitterAnimationFinishedListener
+-  ) {
+-    return;
+-  }
++function setupGlobalEventEmitterListeners() {
+   globalEventEmitterGetValueListener = RCTDeviceEventEmitter.addListener(
+     'onNativeAnimatedModuleGetValue',
+     params => {
