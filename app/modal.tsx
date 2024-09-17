@@ -1,30 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link } from 'expo-router';
 import { StyleSheet, Platform, Pressable } from 'react-native';
-import { version as rnVersion } from 'react-native/package.json';
-import { version as routerVersion } from 'expo-router/package.json';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useScale } from '@/hooks/useScale';
-const hermesVersion = (global as any)?.HermesInternal?.getRuntimeProperties();
-const jsEngine =
-  Platform.OS === 'web' ? 'Browser' : hermesVersion ? `Hermes` : 'JSC';
 
-const uiManager =
-  ((global as any)?.nativeFabricUIManager as any) !== undefined
-    ? 'Fabric'
-    : 'Paper';
-const reactNativeInfo = {
-  hermesVersion,
-  uiManager,
-};
+import { reactNativeInfo } from '@/constants/ReactNativeInfo';
 
 export default function Modal() {
   const styles = useHomeScreenStyles();
   const scale = useScale();
 
+  const { rnVersion, routerVersion, hermesVersion, uiManager } =
+    reactNativeInfo;
   // If the page was reloaded or navigated to directly, then the modal should be presented as
   // a full screen page. You may need to change the UI to account for this.
   return (
@@ -42,9 +32,13 @@ export default function Modal() {
         <ThemedText type="title">About this demo</ThemedText>
         <ThemedText type="small">{`expo-router: ${routerVersion}`}</ThemedText>
         <ThemedText type="small">{`react-native-tvos: ${rnVersion}`}</ThemedText>
-        <ThemedText type="small">{`Hermes bytecode version: ${reactNativeInfo.hermesVersion['Bytecode Version']}`}</ThemedText>
+        <ThemedText type="small">{`Hermes bytecode version: ${JSON.stringify(
+          hermesVersion,
+          null,
+          2,
+        )}`}</ThemedText>
         <ThemedText type="small">{`${
-          reactNativeInfo?.uiManager === 'Fabric' ? 'Fabric enabled' : ''
+          uiManager === 'Fabric' ? 'Fabric enabled' : ''
         }`}</ThemedText>
       </ThemedView>
       {/* Use `../` as a simple way to navigate to the root. This is not analogous to "goBack". */}
