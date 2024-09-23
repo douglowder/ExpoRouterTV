@@ -7,13 +7,9 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useScale } from '@/hooks/useScale';
-import { reactNativeInfo } from '@/constants/ReactNativeInfo';
 
 export default function HomeScreen() {
   const styles = useHomeScreenStyles();
-  const { rnVersion, routerVersion, hermesVersion, uiManager } =
-    reactNativeInfo;
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -28,12 +24,6 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
-      <ThemedText>{`expo-router: ${routerVersion}`}</ThemedText>
-      <ThemedText>{`react-native-tvos: ${rnVersion}`}</ThemedText>
-      <ThemedText>{`Hermes bytecode version: ${hermesVersion['Bytecode Version']}`}</ThemedText>
-      <ThemedText>{`${
-        uiManager === 'Fabric' ? 'Fabric enabled' : ''
-      }`}</ThemedText>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
         <ThemedText>
