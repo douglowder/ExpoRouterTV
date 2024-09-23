@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "postinstall": "patch-package",
-    "prebuild": "expo prebuild --clean",
-    "prebuild:tv": "EXPO_TV=1 expo prebuild --clean",
+    "prebuild": "DEBUG=expo:* expo prebuild --clean",
+    "prebuild:tv": "DEBUG=expo:* EXPO_TV=1 expo prebuild --clean",
     "start": "expo start",
     "start:tv": "EXPO_TV=1 expo start",
     "android": "expo run:android",
