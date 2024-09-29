@@ -8,18 +8,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useScale } from '@/hooks/useScale';
-const hermesVersion = (global as any)?.HermesInternal?.getRuntimeProperties();
-const jsEngine =
-  Platform.OS === 'web' ? 'Browser' : hermesVersion ? `Hermes` : 'JSC';
-
-const uiManager =
-  ((global as any)?.nativeFabricUIManager as any) !== undefined
-    ? 'Fabric'
-    : 'Paper';
-const reactNativeInfo = {
-  hermesVersion,
-  uiManager,
-};
+import { reactNativeInfo } from '@/constants/ReactNativeInfo';
 
 export default function Modal() {
   const styles = useHomeScreenStyles();
