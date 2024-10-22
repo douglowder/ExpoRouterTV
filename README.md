@@ -19,8 +19,8 @@ This project uses
 ```sh
 yarn
 yarn prebuild:tv # Executes Expo prebuild with TV modifications
-yarn ios:tv # Build and run for Apple TV
-yarn android:tv # Build and run for Android TV
+yarn ios # Build and run for Apple TV
+yarn android # Build and run for Android TV
 ```
 
 - Mobile builds:
@@ -40,7 +40,7 @@ This project includes a [demo](./components/EventHandlingDemo.tsx) showing how t
 
 ## TV specific file extensions
 
-This project includes an [example Metro configuration](./metro.config.js) that allows Metro to resolve application source files with TV-specific code, indicated by specific file extensions (`*.ios.tv.tsx`, `*.android.tv.tsx`, `*.tv.tsx`). The [ExternalLink](./components/ExternalLink.tsx) component makes use of this by having a [separate TV source file](./components/ExternalLink.tv.tsx) that avoids importing packages that don't exist on Apple TV.
+This project includes an [example Metro configuration](./metro.config.js) that allows Metro to resolve application source files with TV-specific code, indicated by specific file extensions (`*.ios.tv.tsx`, `*.android.tv.tsx`, `*.tv.tsx`).
 
 ## Get a fresh project
 
