@@ -1166,6 +1166,11 @@
   resolved "https://registry.yarnpkg.com/@expo/metro-runtime/-/metro-runtime-3.3.0-canary-20241021-c4b5a93.tgz#bf0c1787576086c66810fb1efa707f8254438e6d"
   integrity sha512-WhusRosXEiKtHX5uRki0amO9Ar5LgiKoQH894kUE+CjWe/VRsLg89/eFS0ltRpKIMMTDs2xj/UM3MWr8tDXMtA==
 
+"@expo/metro-runtime@~4.0.0-preview.0":
+  version "4.0.0-preview.0"
+  resolved "https://registry.yarnpkg.com/@expo/metro-runtime/-/metro-runtime-4.0.0-preview.0.tgz#bea4bc16b96549cc611b77e5ddd72a78526b2121"
+  integrity sha512-qay5RASJSVfbhNydqeo5+JiigL5nIZYGVR6ZKO2PYqKIWGaLBMhVtBkYwlr2PpCZDxhaXlWve3rz8EcZOvkapw==
+
 "@expo/osascript@^2.0.31":
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/@expo/osascript/-/osascript-2.1.3.tgz#912b74825cb83f3b958cad81034df9e19f1f2808"

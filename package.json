@@ -21,6 +21,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~4.0.0-preview.0",
     "@expo/vector-icons": "^14.0.0",
     "expo": "^52.0.0-canary-20241021-c4b5a93",
     "expo-application": "6.0.0-canary-20241021-c4b5a93",
