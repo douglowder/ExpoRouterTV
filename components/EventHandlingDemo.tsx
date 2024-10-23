@@ -211,7 +211,7 @@ const TouchableNativeFeedbackButton = (props: {
 };
 
 const useDemoStyles = function () {
-  const scale = useScale();
+  const { scale } = useScale();
   const highlightColor = useThemeColor({}, 'link');
   const backgroundColor = useThemeColor({}, 'background');
   const tintColor = useThemeColor({}, 'tint');

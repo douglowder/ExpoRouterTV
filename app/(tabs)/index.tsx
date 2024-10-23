@@ -1,6 +1,5 @@
 import { Image, StyleSheet, Platform, Pressable } from 'react-native';
 import { Link } from 'expo-router';
-import * as Application from 'expo-application';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -75,7 +74,7 @@ export default function HomeScreen() {
 }
 
 const useHomeScreenStyles = function () {
-  const scale = useScale();
+  const { scale } = useScale();
   return StyleSheet.create({
     titleContainer: {
       flexDirection: 'row',

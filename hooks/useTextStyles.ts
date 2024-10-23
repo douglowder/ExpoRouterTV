@@ -4,6 +4,6 @@ import { useScale } from './useScale';
 
 export function useTextStyles() {
   const linkColor = useThemeColor({}, 'link');
-  const scale = useScale() ?? 1.0;
+  const scale = useScale().scale ?? 1.0;
   return textStyles(scale, linkColor);
 }

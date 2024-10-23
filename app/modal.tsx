@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link } from 'expo-router';
-import { StyleSheet, Platform, Pressable } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -11,7 +11,7 @@ import { reactNativeInfo } from '@/constants/ReactNativeInfo';
 
 export default function Modal() {
   const styles = useHomeScreenStyles();
-  const scale = useScale();
+  const { scale } = useScale();
 
   const { rnVersion, routerVersion, hermesVersion, uiManager } =
     reactNativeInfo;
@@ -56,7 +56,7 @@ export default function Modal() {
 }
 
 const useHomeScreenStyles = function () {
-  const scale = useScale();
+  const { scale } = useScale();
   return StyleSheet.create({
     titleContainer: {
       flexDirection: 'row',

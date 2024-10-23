@@ -23,7 +23,7 @@ export default function ParallaxScrollView({
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
-  const scale = useScale();
+  const { scale } = useScale();
   const styles = useParallaxScrollViewStyles();
 
   const HEADER_HEIGHT = 125 * scale;
@@ -68,7 +68,7 @@ export default function ParallaxScrollView({
 }
 
 const useParallaxScrollViewStyles = function () {
-  const scale = useScale();
+  const { scale } = useScale();
   return StyleSheet.create({
     container: {
       flex: 1,

@@ -80,6 +80,20 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="video"
+        options={{
+          title: 'Video demo',
+          tabBarButton,
+          tabBarLabelStyle: textStyles.default,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? 'code-slash' : 'code-slash-outline'}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

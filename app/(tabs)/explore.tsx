@@ -10,7 +10,7 @@ import { useScale } from '@/hooks/useScale';
 
 export default function ExploreScreen() {
   const styles = useExploreScreenStyles();
-  const scale = useScale();
+  const { scale } = useScale();
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -123,7 +123,7 @@ export default function ExploreScreen() {
 }
 
 const useExploreScreenStyles = function () {
-  const scale = useScale();
+  const { scale } = useScale();
   return StyleSheet.create({
     headerImage: {
       color: '#808080',
