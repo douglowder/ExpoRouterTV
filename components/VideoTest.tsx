@@ -51,22 +51,24 @@ export default function VideoTest() {
 
   return (
     <View style={styles.container}>
-      {videoStatus === 'readyToPlay' || Platform.OS === 'android' ? (
-        <VideoView
-          ref={ref}
-          style={styles.videoStyle}
-          player={player}
-          nativeControls
-          contentFit="fill"
-          showsTimecodes
-          allowsFullscreen
-          allowsPictureInPicture
-          contentPosition={{ dx: 0, dy: 0 }}
-        />
-      ) : (
-        <View style={styles.videoStyle} />
-      )}
-      <ProgressBar fractionComplete={fractionComplete} />
+      <View style={styles.videoStyle}>
+        {videoStatus === 'readyToPlay' || Platform.OS === 'android' ? (
+          <VideoView
+            ref={ref}
+            style={styles.videoStyle}
+            player={player}
+            nativeControls
+            contentFit="fill"
+            showsTimecodes
+            allowsFullscreen
+            allowsPictureInPicture
+            contentPosition={{ dx: 0, dy: 0 }}
+          />
+        ) : (
+          <View style={styles.videoStyle} />
+        )}
+        <ProgressBar fractionComplete={fractionComplete} />
+      </View>
       <View style={styles.buttons}>
         <Button
           title="Rewind"
@@ -149,47 +151,43 @@ const Button = (props: { title: string; onPress: () => void }) => {
   );
 };
 
-const backgroundColor = '#ecf0f1';
-
 const useVideoStyles = () => {
   const { width, height, scale } = useScale();
 
   const dim = Math.min(width, height);
 
-  const vidWidth = dim === height ? width * 0.3 : height * 0.3;
+  const vidWidth = dim === height ? width * 0.6 : height * 0.6;
   const vidHeight = (vidWidth * 480) / 960;
 
   return StyleSheet.create({
     container: {
       flex: 1,
+      flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor,
     },
     videoStyle: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       width: vidWidth,
       height: vidHeight,
     },
     buttons: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
       justifyContent: 'center',
-      alignItems: 'center',
-      width: width * 0.75,
-      marginHorizontal: 50 * scale,
+      alignItems: 'flex-start',
     },
     button: {
       backgroundColor: 'darkblue',
-      margin: 20 * scale,
+      margin: 10 * scale,
       borderRadius: 5 * scale,
       padding: 10 * scale,
     },
     buttonText: {
       color: 'white',
-      fontSize: 20 * scale,
+      fontSize: 10 * scale,
     },
     progressContainer: {
-      backgroundColor,
       flexDirection: 'row',
       width: vidWidth,
       height: 5 * scale,
@@ -203,7 +201,6 @@ const useVideoStyles = () => {
       height: '100%',
     },
     progressRight: {
-      backgroundColor,
       flexDirection: 'row',
       height: '100%',
     },
