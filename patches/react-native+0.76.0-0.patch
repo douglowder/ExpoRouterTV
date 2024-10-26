@@ -1,0 +1,26 @@
+diff --git a/node_modules/react-native/Libraries/Components/Pressable/useAndroidRippleForView.js b/node_modules/react-native/Libraries/Components/Pressable/useAndroidRippleForView.js
+index 20dd19e..009ba49 100644
+--- a/node_modules/react-native/Libraries/Components/Pressable/useAndroidRippleForView.js
++++ b/node_modules/react-native/Libraries/Components/Pressable/useAndroidRippleForView.js
+@@ -80,8 +80,8 @@ export default function useAndroidRippleForView(
+           if (view != null) {
+             Commands.hotspotUpdate(
+               view,
+-              event.nativeEvent.locationX ?? 0,
+-              event.nativeEvent.locationY ?? 0,
++              event.nativeEvent?.locationX ?? 0,
++              event.nativeEvent?.locationY ?? 0,
+             );
+             Commands.setPressed(view, true);
+           }
+@@ -91,8 +91,8 @@ export default function useAndroidRippleForView(
+           if (view != null) {
+             Commands.hotspotUpdate(
+               view,
+-              event.nativeEvent.locationX ?? 0,
+-              event.nativeEvent.locationY ?? 0,
++              event.nativeEvent?.locationX ?? 0,
++              event.nativeEvent?.locationY ?? 0,
+             );
+           }
+         },
