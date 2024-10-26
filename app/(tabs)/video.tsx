@@ -16,7 +16,7 @@ export default function VideoDemoScreen() {
       headerImage={
         <Ionicons
           size={310 * scale}
-          name="tv-outline"
+          name="videocam-outline"
           style={styles.headerImage}
         />
       }

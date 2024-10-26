@@ -31,10 +31,14 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         tabBarStyle: {
-          height: textStyles.title.lineHeight * 2,
+          height: textStyles.title.lineHeight * 2.5,
           marginBottom: 0,
           paddingBottom: textStyles.title.lineHeight * 0.5,
         },
+        tabBarButton,
+        tabBarLabelStyle: textStyles.subtitle,
+        tabBarPosition: 'top',
+        tabBarLabelPosition: 'beside-icon',
         headerShown: false,
       }}
     >
@@ -42,8 +46,6 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarButton,
-          tabBarLabelStyle: textStyles.default,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? 'home' : 'home-outline'}
@@ -56,8 +58,6 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: 'Explore',
-          tabBarButton,
-          tabBarLabelStyle: textStyles.default,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? 'code-slash' : 'code-slash-outline'}
@@ -70,13 +70,8 @@ export default function TabLayout() {
         name="tv_focus"
         options={{
           title: 'TV event demo',
-          tabBarButton,
-          tabBarLabelStyle: textStyles.default,
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? 'code-slash' : 'code-slash-outline'}
-              color={color}
-            />
+            <TabBarIcon name={focused ? 'tv' : 'tv-outline'} color={color} />
           ),
         }}
       />
@@ -84,11 +79,9 @@ export default function TabLayout() {
         name="video"
         options={{
           title: 'Video demo',
-          tabBarButton,
-          tabBarLabelStyle: textStyles.default,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? 'code-slash' : 'code-slash-outline'}
+              name={focused ? 'videocam' : 'videocam-outline'}
               color={color}
             />
           ),
