@@ -26,7 +26,7 @@ export default function ParallaxScrollView({
   const { scale } = useScale();
   const styles = useParallaxScrollViewStyles();
 
-  const HEADER_HEIGHT = 125 * scale;
+  const HEADER_HEIGHT = 75 * scale;
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -74,7 +74,7 @@ const useParallaxScrollViewStyles = function () {
       flex: 1,
     },
     header: {
-      height: 125 * scale,
+      height: 75 * scale,
       overflow: 'hidden',
     },
     content: {
