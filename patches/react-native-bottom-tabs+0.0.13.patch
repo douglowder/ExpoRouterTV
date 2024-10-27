@@ -1,0 +1,30 @@
+diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
+index 18fd234..8aa1fae 100644
+--- a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
++++ b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
+@@ -188,9 +188,11 @@ extension View {
+   
+   @ViewBuilder
+   func tabBadge(_ data: String?) -> some View {
+-    if #available(iOS 15.0, macOS 15.0, visionOS 2.0, *) {
++    if #available(iOS 15.0, macOS 15.0, visionOS 2.0, tvOS 15.0, *) {
+       if let data = data, !data.isEmpty {
++        #if !os(tvOS)
+         self.badge(data)
++        #endif
+       } else {
+         self
+       }
+diff --git a/node_modules/react-native-bottom-tabs/react-native-bottom-tabs.podspec b/node_modules/react-native-bottom-tabs/react-native-bottom-tabs.podspec
+index b49b07c..d8ef59e 100644
+--- a/node_modules/react-native-bottom-tabs/react-native-bottom-tabs.podspec
++++ b/node_modules/react-native-bottom-tabs/react-native-bottom-tabs.podspec
+@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
+   s.license      = package["license"]
+   s.authors      = package["author"]
+ 
+-  s.platforms    = { :ios => "14.0", :visionos => "1.0" }
++  s.platforms    = { :ios => "14.0", :visionos => "1.0", :tvos => "15.1" }
+   s.source       = { :git => "https://github.com/okwasniewski/react-native-bottom-tabs.git", :tag => "#{s.version}" }
+ 
+   s.source_files = "ios/**/*.{h,m,mm,cpp,swift}"
