@@ -1,10 +1,6 @@
 import React from 'react';
-import { Pressable } from 'react-native';
-import { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useTextStyles } from '@/hooks/useTextStyles';
 import { withLayoutContext } from 'expo-router';
 import { createNativeBottomTabNavigator } from 'react-native-bottom-tabs/react-navigation';
 
@@ -14,13 +10,12 @@ export const Tabs = withLayoutContext(
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const textStyles = useTextStyles();
 
   return (
     <Tabs
+      sidebarAdaptable
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarLabelStyle: textStyles.subtitle,
         headerShown: false,
       }}
     >
