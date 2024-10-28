@@ -24,7 +24,7 @@ export default function ParallaxScrollView({
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
   const { scale } = useScale();
-  const styles = useParallaxScrollViewStyles();
+  const styles = useParallaxScrollViewStyles(scale);
 
   const HEADER_HEIGHT = 75 * scale;
 
@@ -67,8 +67,7 @@ export default function ParallaxScrollView({
   );
 }
 
-const useParallaxScrollViewStyles = function () {
-  const { scale } = useScale();
+const useParallaxScrollViewStyles = function (scale: number) {
   return StyleSheet.create({
     container: {
       flex: 1,
