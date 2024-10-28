@@ -13,9 +13,11 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      sidebarAdaptable
+      tabBarActiveTintColor={Colors[colorScheme ?? 'light'].tint}
+      tabBarInactiveTintColor={Colors[colorScheme ?? 'light'].text}
+      barTintColor={Colors[colorScheme ?? 'light'].background}
+      translucent
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
       }}
     >
