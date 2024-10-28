@@ -86,8 +86,8 @@ const useHomeScreenStyles = function () {
       marginBottom: 8 * scale,
     },
     reactLogo: {
-      height: 178 * scale,
-      width: 290 * scale,
+      height: 75 * scale,
+      width: 150 * scale,
       bottom: 0,
       left: 0,
       position: 'absolute',

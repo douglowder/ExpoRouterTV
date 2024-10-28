@@ -15,7 +15,7 @@ export default function VideoDemoScreen() {
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
       headerImage={
         <Ionicons
-          size={310 * scale}
+          size={200 * scale}
           name="videocam-outline"
           style={styles.headerImage}
         />
@@ -34,7 +34,7 @@ const useTVDemoScreenStyles = function () {
   return StyleSheet.create({
     headerImage: {
       color: '#808080',
-      bottom: -45 * scale,
+      bottom: -30 * scale,
       left: 0,
       position: 'absolute',
     },
