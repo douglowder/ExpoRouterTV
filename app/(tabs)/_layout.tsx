@@ -3,6 +3,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { withLayoutContext } from 'expo-router';
 import { createNativeBottomTabNavigator } from 'react-native-bottom-tabs/react-navigation';
+import { Platform } from 'react-native';
 
 export const Tabs = withLayoutContext(
   createNativeBottomTabNavigator().Navigator,
@@ -10,16 +11,12 @@ export const Tabs = withLayoutContext(
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-
+  const colors = Colors[colorScheme ?? 'light'];
   return (
     <Tabs
-      tabBarActiveTintColor={Colors[colorScheme ?? 'light'].tint}
-      tabBarInactiveTintColor={Colors[colorScheme ?? 'light'].text}
-      barTintColor={Colors[colorScheme ?? 'light'].background}
-      translucent
-      screenOptions={{
-        headerShown: false,
-      }}
+      tabBarActiveTintColor={colors.tabIconSelected}
+      tabBarInactiveTintColor={colors.tabIconDefault}
+      barTintColor={Platform.OS === 'ios' ? colors.background : undefined}
     >
       <Tabs.Screen
         name="index"
