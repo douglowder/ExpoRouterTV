@@ -32,7 +32,8 @@
       ],
       "expo-router",
       "expo-font",
-      "expo-video"
+      "expo-video",
+      "react-native-bottom-tabs"
     ],
     "experiments": {
       "typedRoutes": true
