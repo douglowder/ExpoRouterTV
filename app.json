@@ -48,7 +48,10 @@
       }
     },
     "android": {
-      "package": "com.douglowderexpo.ExpoRouterTV"
+      "package": "com.douglowderexpo.ExpoRouterTV",
+      "splash": {
+        "image": "./assets/images/splash.png"
+      }
     },
     "ios": {
       "bundleIdentifier": "com.douglowderexpo.ExpoRouterTV"
