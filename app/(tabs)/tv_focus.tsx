@@ -32,7 +32,7 @@ export default function FocusDemoScreen() {
       </ThemedText>
       <Collapsible title="How it works">
         <ThemedText>
-          On TV platforms, these components have "onFocus()" and "onBlur()"
+          • On TV platforms, these components have "onFocus()" and "onBlur()"
           props, in addition to the usual "onPress()". These can be used to
           modify the style of the component when it is navigated to or navigated
           away from by the TV focus engine. In addition, the functional forms of
@@ -41,8 +41,17 @@ export default function FocusDemoScreen() {
           "focused" as a parameter on TV platforms.
         </ThemedText>
         <ThemedText>
-          As you use the arrow keys to navigate around the screen, the demo uses
-          the above props to update lists of recent events.
+          • As you use the arrow keys to navigate around the screen, the demo
+          uses the above props to update lists of recent events.
+        </ThemedText>
+        <ThemedText>
+          • In RNTV 0.76.2, the focus, blur, pressIn, and pressOut events of
+          Pressable and Touchable components are implemented as core React
+          Native events, emitted directly from native code for better
+          performance. They can be received by containing views in either the
+          capture or bubble phase. This demo shows how information can be
+          attached to these events by a Pressable, and then received by a
+          containing View's event handler.
         </ThemedText>
       </Collapsible>
       {Platform.isTV ? (
