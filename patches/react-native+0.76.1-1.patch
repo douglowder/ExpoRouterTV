@@ -1,0 +1,172 @@
+diff --git a/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts b/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts
+index 63a378d..188e389 100644
+--- a/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts
++++ b/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts
+@@ -20,6 +20,7 @@ import {
+ import {View} from '../View/View';
+ import {AccessibilityProps} from '../View/ViewAccessibility';
+ import {ViewProps} from '../View/ViewPropTypes';
++import {TVParallaxProperties} from '../../../types/public/ReactNativeTVTypes';
+ 
+ export interface PressableStateCallbackType {
+   readonly pressed: boolean;
+@@ -159,6 +160,13 @@ export interface PressableProps
+    * Duration (in milliseconds) to wait after press down before calling onPressIn.
+    */
+   unstable_pressDelay?: number | undefined;
++
++  /**
++   * *(Apple TV only)* Object with properties to control Apple TV parallax effects.
++   *
++   * @platform ios
++   */
++  tvParallaxProperties?: TVParallaxProperties;
+ }
+ 
+ // TODO use React.AbstractComponent when available
+diff --git a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
+index 6a62196..0e132ca 100644
+--- a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
++++ b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
+@@ -277,33 +277,35 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+     [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventLongSelect keyAction:recognizer.eventKeyAction tag:@(self.tag) target:@(self.tag)];
+ }
+ 
+-- (void)animatePress
++- (void)animatePressIn
+ {
+   if (_tvParallaxProperties.enabled == YES) {
+-    float magnification = _tvParallaxProperties.magnification;
+     float pressMagnification = _tvParallaxProperties.pressMagnification;
+ 
+     // Duration of press animation
+     float pressDuration = _tvParallaxProperties.pressDuration;
+ 
+-    // Delay of press animation
+-    float pressDelay = _tvParallaxProperties.pressDelay;
+-
+-    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:pressDelay]];
+-
+     [UIView animateWithDuration:(pressDuration/2)
+                      animations:^{
+       self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
+     }
+-                     completion:^(__unused BOOL finished1){
+-      [UIView animateWithDuration:(pressDuration/2)
+-                       animations:^{
+-        self.transform = CGAffineTransformMakeScale(magnification, magnification);
+-      }
+-                       completion:^(__unused BOOL finished2) {
+-      }];
+-    }];
++                     completion:^(__unused BOOL finished1){}];
++  }
++}
+ 
++- (void) animatePressOut
++{
++  if (_tvParallaxProperties.enabled == YES) {
++    float magnification = _tvParallaxProperties.magnification;
++
++    // Duration of press animation
++    float pressDuration = _tvParallaxProperties.pressDuration;
++
++    [UIView animateWithDuration:(pressDuration/2)
++                     animations:^{
++      self.transform = CGAffineTransformMakeScale(magnification, magnification);
++    }
++                     completion:^(__unused BOOL finished1){}];
+   }
+ }
+ 
+@@ -312,10 +314,11 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+   switch (r.state) {
+       case UIGestureRecognizerStateBegan:
+       _eventEmitter->onPressIn();
++      [self animatePressIn];
+           break;
+       case UIGestureRecognizerStateEnded:
+       case UIGestureRecognizerStateCancelled:
+-      [self animatePress];
++      [self animatePressOut];
+       _eventEmitter->onPressOut();
+           break;
+       default:
+diff --git a/node_modules/react-native/React/Views/RCTTVView.m b/node_modules/react-native/React/Views/RCTTVView.m
+index 4a71f36..0a804cd 100644
+--- a/node_modules/react-native/React/Views/RCTTVView.m
++++ b/node_modules/react-native/React/Views/RCTTVView.m
+@@ -90,32 +90,30 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithCoder : unused)
+   }
+ }
+ 
+-- (void)animatePress
++- (void)animatePressIn
+ {
+   if ([self.tvParallaxProperties[@"enabled"] boolValue] == YES) {
+-    float magnification = [self.tvParallaxProperties[@"magnification"] floatValue];
+     float pressMagnification = [self.tvParallaxProperties[@"pressMagnification"] floatValue];
+-    
+-    // Duration of press animation
+     float pressDuration = [self.tvParallaxProperties[@"pressDuration"] floatValue];
++    [UIView animateWithDuration:(pressDuration/2)
++                     animations:^{
++      self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
++    }
++                     completion:^(__unused BOOL finished1){}];
++  }
++}
+ 
+-    // Delay of press animation
+-    float pressDelay = [self.tvParallaxProperties[@"pressDelay"] floatValue];
+-    
+-    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:pressDelay]];
++- (void) animatePressOut
++{
++  if ([self.tvParallaxProperties[@"enabled"] boolValue] == YES) {
++    float magnification = [self.tvParallaxProperties[@"magnification"] floatValue];
++    float pressDuration = [self.tvParallaxProperties[@"pressDuration"] floatValue];
+ 
+     [UIView animateWithDuration:(pressDuration/2)
+                      animations:^{
+-      self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
++      self.transform = CGAffineTransformMakeScale(magnification, magnification);
+     }
+-                     completion:^(__unused BOOL finished1){
+-      [UIView animateWithDuration:(pressDuration/2)
+-                       animations:^{
+-        self.transform = CGAffineTransformMakeScale(magnification, magnification);
+-      }
+-                       completion:^(__unused BOOL finished2) {
+-      }];
+-    }];
++                     completion:^(__unused BOOL finished1){}];
+   }
+ }
+ 
+@@ -124,10 +122,11 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithCoder : unused)
+   switch (r.state) {
+       case UIGestureRecognizerStateBegan:
+       if (self.onPressIn) self.onPressIn(nil);
++      [self animatePressIn];
+           break;
+       case UIGestureRecognizerStateEnded:
+       case UIGestureRecognizerStateCancelled:
+-      [self animatePress];
++      [self animatePressOut];
+       if (self.onPressOut) self.onPressOut(nil);
+           break;
+       default:
+diff --git a/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts b/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts
+index 8cc7a91..d18dcce 100644
+--- a/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts
++++ b/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts
+@@ -100,7 +100,7 @@ declare module 'react-native' {
+     pressDuration?: number | undefined,
+ 
+     /**
+-     * Defaults to 0.3
++     * @deprecated No longer used
+      */
+     pressDelay?: number | undefined,
+   };
