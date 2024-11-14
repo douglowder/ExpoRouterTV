@@ -17,6 +17,14 @@
           }
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
       "expo-router",
       "expo-font",
       "expo-video",
