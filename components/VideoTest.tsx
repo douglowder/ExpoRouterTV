@@ -156,13 +156,13 @@ const useVideoStyles = () => {
 
   const dim = Math.min(width, height);
 
-  const vidWidth = dim === height ? width * 0.6 : height * 0.6;
+  const vidWidth = dim === height ? height * 0.6 : width * 0.9;
   const vidHeight = (vidWidth * 480) / 960;
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      flexDirection: 'row',
+      flexDirection: Platform.isTV ? 'row' : 'column',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -175,7 +175,7 @@ const useVideoStyles = () => {
     },
     buttons: {
       justifyContent: 'center',
-      alignItems: 'flex-start',
+      alignItems: Platform.isTV ? 'flex-start' : 'center',
     },
     button: {
       backgroundColor: 'darkblue',
