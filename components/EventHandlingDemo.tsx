@@ -7,12 +7,12 @@ import {
   Pressable,
   TouchableHighlight,
   TouchableOpacity,
-  GestureResponderEvent,
   FocusEvent,
   BlurEvent,
   PressableProps,
   TVParallaxProperties,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import { useState } from 'react';
 
@@ -56,30 +56,34 @@ export function EventHandlingDemo() {
     <TVFocusGuideView>
       <ThemedView style={styles.container}>
         <ThemedView style={styles.logContainer}>
-          <View>
-            <ThemedText type="defaultSemiBold">
-              Remote control events
-            </ThemedText>
-            <FlatList
-              contentContainerStyle={styles.logText}
-              data={remoteEventLog}
-              renderItem={({ item }) => (
-                <ThemedText style={styles.logText}>{item}</ThemedText>
-              )}
-            />
-          </View>
-          <View>
-            <ThemedText type="defaultSemiBold">
-              Native focus/blur/press events
-            </ThemedText>
-            <FlatList
-              contentContainerStyle={styles.logText}
-              data={pressableEventLog}
-              renderItem={({ item }) => (
-                <ThemedText style={styles.logText}>{item}</ThemedText>
-              )}
-            />
-          </View>
+          <ScrollView horizontal>
+            <View>
+              <ThemedText type="defaultSemiBold">
+                Remote control events
+              </ThemedText>
+              <FlatList
+                contentContainerStyle={styles.logText}
+                data={remoteEventLog}
+                renderItem={({ item }) => (
+                  <ThemedText style={styles.logText}>{item}</ThemedText>
+                )}
+              />
+            </View>
+          </ScrollView>
+          <ScrollView horizontal>
+            <View>
+              <ThemedText type="defaultSemiBold">
+                Native focus/blur/press events
+              </ThemedText>
+              <FlatList
+                contentContainerStyle={styles.logText}
+                data={pressableEventLog}
+                renderItem={({ item }) => (
+                  <ThemedText style={styles.logText}>{item}</ThemedText>
+                )}
+              />
+            </View>
+          </ScrollView>
         </ThemedView>
         <ThemedView
           style={styles.buttonsContainer}
