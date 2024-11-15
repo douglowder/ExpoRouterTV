@@ -1,3 +1,29 @@
+diff --git a/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts b/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts
+index 63a378d..188e389 100644
+--- a/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts
++++ b/node_modules/react-native/Libraries/Components/Pressable/Pressable.d.ts
+@@ -20,6 +20,7 @@ import {
+ import {View} from '../View/View';
+ import {AccessibilityProps} from '../View/ViewAccessibility';
+ import {ViewProps} from '../View/ViewPropTypes';
++import {TVParallaxProperties} from '../../../types/public/ReactNativeTVTypes';
+ 
+ export interface PressableStateCallbackType {
+   readonly pressed: boolean;
+@@ -159,6 +160,13 @@ export interface PressableProps
+    * Duration (in milliseconds) to wait after press down before calling onPressIn.
+    */
+   unstable_pressDelay?: number | undefined;
++
++  /**
++   * *(Apple TV only)* Object with properties to control Apple TV parallax effects.
++   *
++   * @platform ios
++   */
++  tvParallaxProperties?: TVParallaxProperties;
+ }
+ 
+ // TODO use React.AbstractComponent when available
 diff --git a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.h b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.h
 index 7107a8c..afea86c 100644
 --- a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.h
@@ -12,7 +38,7 @@ index 7107a8c..afea86c 100644
    facebook::react::LayoutMetrics _layoutMetrics;
    facebook::react::SharedViewProps _props;
 diff --git a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
-index 6a62196..144c766 100644
+index 6a62196..fced1ec 100644
 --- a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
 +++ b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
 @@ -64,6 +64,7 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
@@ -23,40 +49,37 @@ index 6a62196..144c766 100644
    NSSet<NSString *> *_Nullable _propKeysManagedByAnimated_DO_NOT_USE_THIS_IS_BROKEN;
    UIView *_containerView;
    BOOL _useCustomContainerView;
-@@ -158,6 +159,10 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+@@ -158,6 +159,11 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
    }
  }
  
++// Press recognizer should allow long press recognizer to work (but not the reverse)
 +- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-+  return YES;
++  return gestureRecognizer == _pressRecognizer;
 +}
 +
  #if TARGET_OS_TV
  
  #pragma mark - Apple TV methods
-@@ -267,59 +272,83 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+@@ -267,59 +273,104 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
      [[NSNotificationCenter defaultCenter] postNavigationBlurEventWithTag:@(self.tag) target:@(self.tag)];
  }
  
 -- (void)sendSelectNotification:(UIGestureRecognizer *)recognizer
-+- (void)sendSelectNotification
- {
-     [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventSelect keyAction:RCTTVRemoteEventKeyActionUp tag:@(self.tag) target:@(self.tag)];
- }
- 
--- (void)sendLongSelectNotification:(UIGestureRecognizer *)recognizer
 +- (void)sendLongSelectStartNotification
  {
--    [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventLongSelect keyAction:recognizer.eventKeyAction tag:@(self.tag) target:@(self.tag)];
+-    [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventSelect keyAction:RCTTVRemoteEventKeyActionUp tag:@(self.tag) target:@(self.tag)];
 +    [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventLongSelect keyAction:RCTTVRemoteEventKeyActionDown tag:@(self.tag) target:@(self.tag)];
  }
  
--- (void)animatePress
+-- (void)sendLongSelectNotification:(UIGestureRecognizer *)recognizer
 +- (void)sendLongSelectEndNotification
-+{
+ {
+-    [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventLongSelect keyAction:recognizer.eventKeyAction tag:@(self.tag) target:@(self.tag)];
 +    [[NSNotificationCenter defaultCenter] postNavigationPressEventWithType:RCTTVRemoteEventLongSelect keyAction:RCTTVRemoteEventKeyActionUp tag:@(self.tag) target:@(self.tag)];
-+}
-+
+ }
+ 
+-- (void)animatePress
 +- (void)animatePressIn
  {
    if (_tvParallaxProperties.enabled == YES) {
@@ -68,12 +91,27 @@ index 6a62196..144c766 100644
  
 -    // Delay of press animation
 -    float pressDelay = _tvParallaxProperties.pressDelay;
--
++    [UIView animateWithDuration:(pressDuration/2)
++                     animations:^{
++      self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
++    }
++                     completion:^(__unused BOOL finished1){}];
++  }
++}
+ 
 -    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:pressDelay]];
--
++- (void) animatePressOut
++{
++  if (_tvParallaxProperties.enabled == YES) {
++    float magnification = _tvParallaxProperties.magnification;
++
++    // Duration of press animation
++    float pressDuration = _tvParallaxProperties.pressDuration;
+ 
      [UIView animateWithDuration:(pressDuration/2)
                       animations:^{
-       self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
+-      self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
++      self.transform = CGAffineTransformMakeScale(magnification, magnification);
      }
 -                     completion:^(__unused BOOL finished1){
 -      [UIView animateWithDuration:(pressDuration/2)
@@ -87,58 +125,66 @@ index 6a62196..144c766 100644
 +  }
 +}
 +
-+- (void) animatePressOut
-+{
-+  if (_tvParallaxProperties.enabled == YES) {
-+    float magnification = _tvParallaxProperties.magnification;
- 
-+    // Duration of press animation
-+    float pressDuration = _tvParallaxProperties.pressDuration;
++- (void)setUpTVGestureRecognizers {
++  UILongPressGestureRecognizer *pressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handlePress:)];
++  pressRecognizer.allowedPressTypes = @[ @(UIPressTypeSelect) ];
++  pressRecognizer.minimumPressDuration = 0.0;
++  pressRecognizer.delegate = self; // Press recognizer allows other recognizers to run
 +
-+    [UIView animateWithDuration:(pressDuration/2)
-+                     animations:^{
-+      self.transform = CGAffineTransformMakeScale(magnification, magnification);
-+    }
-+                     completion:^(__unused BOOL finished1){}];
++  [self addGestureRecognizer:pressRecognizer];
++  _pressRecognizer = pressRecognizer;
+ 
++  UILongPressGestureRecognizer *longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
++  longPressRecognizer.allowedPressTypes = @[ @(UIPressTypeSelect) ];
++  longPressRecognizer.minimumPressDuration = 0.5;
++
++  [self addGestureRecognizer:longPressRecognizer];
++  _longPressRecognizer = longPressRecognizer;
++}
++
++- (void)tearDownTVGestureRecognizers {
++  if (_pressRecognizer) {
++    [self removeGestureRecognizer:_pressRecognizer];
++  }
++  if (_longPressRecognizer) {
++    [self removeGestureRecognizer:_longPressRecognizer];
    }
  }
  
- - (void)handlePress:(UIGestureRecognizer *)r
-+{
-+  if (r.state == UIGestureRecognizerStateBegan) {
-+    NSLog(@"handlePressStart");
-+    _eventEmitter->onPressIn();
-+    [self animatePressIn];
-+    return;
-+  }
-+  if (r.state == UIGestureRecognizerStateEnded) {
-+    NSLog(@"handlePressEnd");
-+    [self animatePressOut];
-+    _eventEmitter->onPressOut();
-+    return;
-+  }
-+}
 +
-+- (void)handleLongPress:(UIGestureRecognizer *)r
+ - (void)handlePress:(UIGestureRecognizer *)r
  {
    switch (r.state) {
 -      case UIGestureRecognizerStateBegan:
--      _eventEmitter->onPressIn();
++    case UIGestureRecognizerStateBegan:
+       _eventEmitter->onPressIn();
 -          break;
 -      case UIGestureRecognizerStateEnded:
 -      case UIGestureRecognizerStateCancelled:
 -      [self animatePress];
--      _eventEmitter->onPressOut();
++      [self animatePressIn];
++      break;
++    case UIGestureRecognizerStateCancelled:
++    case UIGestureRecognizerStateEnded:
++      [self animatePressOut];
+       _eventEmitter->onPressOut();
 -          break;
 -      default:
 -          break;
++      break;
++    default:
++      break;
++  }
++}
++
++- (void)handleLongPress:(UIGestureRecognizer *)r
++{
++  switch (r.state) {
 +    case UIGestureRecognizerStateBegan:
-+      NSLog(@"handleLongPressStart");
 +      [self sendLongSelectStartNotification];
 +      break;
 +    case UIGestureRecognizerStateEnded:
 +    case UIGestureRecognizerStateCancelled:
-+      NSLog(@"handleLongPressEnd");
 +      [self sendLongSelectEndNotification];
 +      break;
 +    default:
@@ -146,31 +192,100 @@ index 6a62196..144c766 100644
    }
  }
  
-@@ -1042,14 +1071,26 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+@@ -1040,16 +1091,9 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+   // `isTVSelectable`
+   if (oldViewProps.isTVSelectable != newViewProps.isTVSelectable) {
      if (newViewProps.isTVSelectable && ![self isTVFocusGuide]) {
-       UILongPressGestureRecognizer *pressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handlePress:)];
-       pressRecognizer.allowedPressTypes = @[ @(UIPressTypeSelect) ];
+-      UILongPressGestureRecognizer *pressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handlePress:)];
+-      pressRecognizer.allowedPressTypes = @[ @(UIPressTypeSelect) ];
 -      pressRecognizer.minimumPressDuration = 0;
-+      pressRecognizer.minimumPressDuration = 0.05;
-+      pressRecognizer.delegate = self;
- 
-       [self addGestureRecognizer:pressRecognizer];
-       _pressRecognizer = pressRecognizer;
-+
-+      UILongPressGestureRecognizer *longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-+      longPressRecognizer.allowedPressTypes = @[ @(UIPressTypeSelect) ];
-+      longPressRecognizer.minimumPressDuration = 0.5;
-+      //longPressRecognizer.delegate = self;
-+
-+      [self addGestureRecognizer:longPressRecognizer];
-+      _longPressRecognizer = longPressRecognizer;
+-      
+-      [self addGestureRecognizer:pressRecognizer];
+-      _pressRecognizer = pressRecognizer;
++      [self setUpTVGestureRecognizers];
      } else {
-       if (_pressRecognizer) {
-         [self removeGestureRecognizer:_pressRecognizer];
-       }
-+      if (_longPressRecognizer) {
-+        [self removeGestureRecognizer:_longPressRecognizer];
-+      }
+-      if (_pressRecognizer) {
+-        [self removeGestureRecognizer:_pressRecognizer];
+-      }
++      [self tearDownTVGestureRecognizers];
      }
    }
    // `tvParallaxProperties
+diff --git a/node_modules/react-native/React/Views/RCTTVView.m b/node_modules/react-native/React/Views/RCTTVView.m
+index 4a71f36..2e158f6 100644
+--- a/node_modules/react-native/React/Views/RCTTVView.m
++++ b/node_modules/react-native/React/Views/RCTTVView.m
+@@ -90,32 +90,30 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithCoder : unused)
+   }
+ }
+ 
+-- (void)animatePress
++- (void)animatePressIn
+ {
+   if ([self.tvParallaxProperties[@"enabled"] boolValue] == YES) {
+-    float magnification = [self.tvParallaxProperties[@"magnification"] floatValue];
+     float pressMagnification = [self.tvParallaxProperties[@"pressMagnification"] floatValue];
+-    
+-    // Duration of press animation
+     float pressDuration = [self.tvParallaxProperties[@"pressDuration"] floatValue];
++    [UIView animateWithDuration:(pressDuration/2)
++                     animations:^{
++      self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
++    }
++                     completion:^(__unused BOOL finished1){}];
++  }
++}
+     
+-    // Delay of press animation
+-    float pressDelay = [self.tvParallaxProperties[@"pressDelay"] floatValue];
+-    
+-    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:pressDelay]];
++- (void) animatePressOut
++{
++  if ([self.tvParallaxProperties[@"enabled"] boolValue] == YES) {
++    float magnification = [self.tvParallaxProperties[@"magnification"] floatValue];
++    float pressDuration = [self.tvParallaxProperties[@"pressDuration"] floatValue];
+     
+     [UIView animateWithDuration:(pressDuration/2)
+                      animations:^{
+-      self.transform = CGAffineTransformMakeScale(pressMagnification, pressMagnification);
++      self.transform = CGAffineTransformMakeScale(magnification, magnification);
+     }
+-                     completion:^(__unused BOOL finished1){
+-      [UIView animateWithDuration:(pressDuration/2)
+-                       animations:^{
+-        self.transform = CGAffineTransformMakeScale(magnification, magnification);
+-      }
+-                       completion:^(__unused BOOL finished2) {
+-      }];
+-    }];
++                     completion:^(__unused BOOL finished1){}];
+   }
+ }
+ 
+@@ -124,10 +122,11 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithCoder : unused)
+   switch (r.state) {
+       case UIGestureRecognizerStateBegan:
+       if (self.onPressIn) self.onPressIn(nil);
++      [self animatePressIn];
+           break;
+       case UIGestureRecognizerStateEnded:
+       case UIGestureRecognizerStateCancelled:
+-      [self animatePress];
++      [self animatePressOut];
+       if (self.onPressOut) self.onPressOut(nil);
+           break;
+       default:
+diff --git a/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts b/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts
+index 8cc7a91..d18dcce 100644
+--- a/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts
++++ b/node_modules/react-native/types/public/ReactNativeTVTypes.d.ts
+@@ -100,7 +100,7 @@ declare module 'react-native' {
+     pressDuration?: number | undefined,
+ 
+     /**
+-     * Defaults to 0.3
++     * @deprecated No longer used
+      */
+     pressDelay?: number | undefined,
+   };
