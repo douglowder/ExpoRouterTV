@@ -1719,10 +1719,10 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
-"@react-native-tvos/config-tv@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@react-native-tvos/config-tv/-/config-tv-0.1.0.tgz#0a5409d5e67a9846ce4bad72261146217dfcdd2c"
-  integrity sha512-W12PonRGgN5FBru2X8maR6NAX+PO7FKiHSIb8kL3628uLsjV9P4wrUXEyr4GhCMECmSRJMHfm8mVX1Wr3sp9gg==
+"@react-native-tvos/config-tv@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@react-native-tvos/config-tv/-/config-tv-0.1.1.tgz#8b8cf204c7a40e458d70be59ee38ab4e32a210cb"
+  integrity sha512-Le/5wGElcNarDcoafCbvk/HMxcG3s0/468xXMWqAsOtBhGAdGtyXtjWEgp/uEr4GgZJlEIdM3ZqiuB8P7p8sjw==
   dependencies:
     getenv "^1.0.0"
 
