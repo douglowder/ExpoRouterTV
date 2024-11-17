@@ -87,16 +87,21 @@ export function EventHandlingDemo() {
         </ThemedView>
         <ThemedView
           style={styles.buttonsContainer}
-          onFocus={(event: ButtonEvent) => {
+          onFocus={(event: any) => {
             updatePressableLog(`Bubbled focus event from ${event.title}`);
           }}
-          onBlur={(event: ButtonEvent) => {
+          onBlur={(event: any) => {
             updatePressableLog(`Bubbled blur event from ${event.title}`);
           }}
         >
           <ThemedText>View receives bubbled focus/blur events</ThemedText>
           <PressableButton title="Pressable 1" log={updatePressableLog} />
           <PressableButton title="Pressable 2" log={updatePressableLog} />
+          <PressableButton
+            title="Pressable 3 no bubbling"
+            log={updatePressableLog}
+            disableFocusAndBlurEventBubbling
+          />
           <TouchableOpacityButton
             title="TouchableOpacity"
             log={updatePressableLog}
@@ -116,7 +121,7 @@ type ButtonEvent = (FocusEvent | BlurEvent) & { title?: string };
 type ButtonProps = {
   title: string;
   log: (entry: string) => void;
-  tvParallaxProperties?: TVParallaxProperties;
+  disableFocusAndBlurEventBubbling?: boolean;
 };
 
 const handleFocusOrBlur = (
@@ -126,6 +131,9 @@ const handleFocusOrBlur = (
 ) => {
   event.title = props.title; // Attach info to the event before it bubbles up
   props.log(`${props.title} ${type}`); // Log the event
+  if (props.disableFocusAndBlurEventBubbling) {
+    event.stopPropagation();
+  }
 };
 
 const PressableButton = (props: PressableProps & ButtonProps) => {
@@ -144,10 +152,14 @@ const PressableButton = (props: PressableProps & ButtonProps) => {
       }
       {...props}
     >
-      {({ focused }) => {
+      {({ focused, pressed }) => {
         return (
           <ThemedText style={styles.pressableText}>
-            {focused ? `${props.title} focused` : props.title}
+            {pressed
+              ? `${props.title} pressed`
+              : focused
+              ? `${props.title} focused`
+              : props.title}
           </ThemedText>
         );
       }}
@@ -157,19 +169,35 @@ const PressableButton = (props: PressableProps & ButtonProps) => {
 
 const TouchableOpacityButton = (props: ButtonProps) => {
   const styles = useDemoStyles();
+  const [focused, setFocused] = useState(false);
+  const [pressed, setPressed] = useState(false);
 
   return (
     <TouchableOpacity
       activeOpacity={0.6}
       style={styles.pressable}
-      onFocus={(event) => handleFocusOrBlur(event, props, 'focus')}
-      onBlur={(event) => handleFocusOrBlur(event, props, 'blur')}
+      onFocus={(event) => {
+        handleFocusOrBlur(event, props, 'focus');
+        setFocused(true);
+      }}
+      onBlur={(event) => {
+        handleFocusOrBlur(event, props, 'blur');
+        setFocused(false);
+      }}
       onPress={() => props.log(`${props.title} press`)}
-      onPressIn={() => props.log(`${props.title} pressIn`)}
-      onPressOut={() => props.log(`${props.title} pressOut`)}
+      onPressIn={() => {
+        props.log(`${props.title} pressIn`);
+        setPressed(true);
+      }}
+      onPressOut={() => {
+        props.log(`${props.title} pressOut`);
+        setPressed(false);
+      }}
       onLongPress={() => props.log(`${props.title} longPress`)}
     >
-      <Text style={styles.pressableText}>{props.title}</Text>
+      <Text style={styles.pressableText}>{`${props.title}${
+        pressed ? ' pressed' : focused ? ' focused' : ''
+      }`}</Text>
     </TouchableOpacity>
   );
 };
@@ -177,19 +205,34 @@ const TouchableOpacityButton = (props: ButtonProps) => {
 const TouchableHighlightButton = (props: ButtonProps) => {
   const styles = useDemoStyles();
   const underlayColor = useThemeColor({}, 'tint');
-
+  const [focused, setFocused] = useState(false);
+  const [pressed, setPressed] = useState(false);
   return (
     <TouchableHighlight
       style={styles.pressable}
       underlayColor={underlayColor}
-      onFocus={(event) => handleFocusOrBlur(event, props, 'focus')}
-      onBlur={(event) => handleFocusOrBlur(event, props, 'blur')}
+      onFocus={(event) => {
+        handleFocusOrBlur(event, props, 'focus');
+        setFocused(true);
+      }}
+      onBlur={(event) => {
+        handleFocusOrBlur(event, props, 'blur');
+        setFocused(false);
+      }}
       onPress={() => props.log(`${props.title} press`)}
-      onPressIn={() => props.log(`${props.title} pressIn`)}
-      onPressOut={() => props.log(`${props.title} pressOut`)}
+      onPressIn={() => {
+        props.log(`${props.title} pressIn`);
+        setPressed(true);
+      }}
+      onPressOut={() => {
+        props.log(`${props.title} pressOut`);
+        setPressed(false);
+      }}
       onLongPress={() => props.log(`${props.title} longPress`)}
     >
-      <Text style={styles.pressableText}>{props.title}</Text>
+      <Text style={styles.pressableText}>{`${props.title}${
+        pressed ? ' pressed' : focused ? ' focused' : ''
+      }`}</Text>
     </TouchableHighlight>
   );
 };
