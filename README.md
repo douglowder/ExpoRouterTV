@@ -9,6 +9,7 @@ This project uses
 
 - the [React Native TV fork](https://github.com/react-native-tvos/react-native-tvos), which supports both phone (Android and iOS) and TV (Android TV and Apple TV) targets
 - the [React Native TV config plugin](https://github.com/react-native-tvos/config-tv/tree/main/packages/config-tv) to allow Expo prebuild to modify the project's native files for TV builds
+- The [react-native-bottom-tabs](https://github.com/okwasniewski/react-native-bottom-tabs) that provides a fully native tab bar (top bar for Apple TV, bottom bar for Android TV).
 
 ## 🚀 How to use
 
