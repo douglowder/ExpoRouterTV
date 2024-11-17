@@ -21,11 +21,7 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static",
-            "newArchEnabled": true
-          },
-          "android": {
-            "newArchEnabled": true
+            "useFrameworks": "static"
           }
         }
       ],
@@ -48,12 +44,14 @@
       }
     },
     "android": {
+      "newArchEnabled": true,
       "package": "com.douglowderexpo.ExpoRouterTV",
       "splash": {
         "image": "./assets/images/splash.png"
       }
     },
     "ios": {
+      "newArchEnabled": true,
       "bundleIdentifier": "com.douglowderexpo.ExpoRouterTV"
     }
   }
