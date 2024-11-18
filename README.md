@@ -1,15 +1,13 @@
-# Expo Router TV demo 👋
+# ExpoRouterTV 👋
 
-![Apple TV screen shot](https://github.com/douglowder/examples/assets/6577821/a881466f-a7a0-4c66-b1fc-33235c466997)
-![Android TV screen shot](https://github.com/douglowder/examples/assets/6577821/815c8e01-8275-4cc1-bd57-b9c8bce1fb02) 
+This is an [Expo Router](https://docs.expo.dev/router/introduction/) SDK 52 project demonstrating how Expo apps can be built for Apple TV and Android TV.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Some of the packages used:
 
-This project uses
-
-- the [React Native TV fork](https://github.com/react-native-tvos/react-native-tvos), which supports both phone (Android and iOS) and TV (Android TV and Apple TV) targets
-- the [React Native TV config plugin](https://github.com/react-native-tvos/config-tv/tree/main/packages/config-tv) to allow Expo prebuild to modify the project's native files for TV builds
-- The [react-native-bottom-tabs](https://github.com/okwasniewski/react-native-bottom-tabs) that provides a fully native tab bar (top bar for Apple TV, bottom bar for Android TV).
+- The [React Native TV fork](https://github.com/react-native-tvos/react-native-tvos), which supports both phone (Android and iOS) and TV (Android TV and Apple TV) targets
+- The [React Native TV config plugin](https://github.com/react-native-tvos/config-tv/tree/main/packages/config-tv), to allow Expo prebuild to modify the project's native files for TV builds
+- The [react-native-bottom-tabs](https://github.com/okwasniewski/react-native-bottom-tabs) package that provides a fully native tab bar (top bar for Apple TV, bottom bar for Android TV).
+- The [expo-video](https://docs.expo.dev/versions/latest/sdk/video/) package, providing cross-platform video playback for both mobile and TV devices.
 
 ## 🚀 How to use
 
@@ -28,7 +26,7 @@ yarn android # Build and run for Android TV
 
 ```sh
 yarn
-yarn prebuild # Executes Expo prebuild with TV modifications
+yarn prebuild # Executes Expo prebuild without TV modifications
 yarn ios # Build and run for iOS
 yarn android # Build and run for Android mobile
 ```
